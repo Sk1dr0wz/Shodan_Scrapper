@@ -16,3 +16,10 @@ You need to fill yours Shodan API in config.ini before run the tool .
 ```
 python3 dork.py
 ```
+
+# Tool View
+
+![screenshot](poc.png)
+
+# Credit
+* [Hamba Abdi]
