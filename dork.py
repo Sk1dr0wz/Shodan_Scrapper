@@ -44,7 +44,7 @@ def main():
 
     parser = argparse.ArgumentParser(description='Shodan Scrapper Tool')
     parser.add_argument('-q', '--query', help='Shodan dork query', required=True)
-    parser.add_argument('-t', '--total_results', type=int, default=1000, help='Total number of results to retrieve')
+    parser.add_argument('-t', '--total_results', type=int, default=1000, help='Total number of results to retrieve (1000 Results equal to 1 Query)')
     args = parser.parse_args()
 
     query = args.query
