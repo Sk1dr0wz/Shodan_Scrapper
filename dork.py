@@ -1,6 +1,7 @@
 import shodan
 import configparser
 from colorama import Fore, Style
+import argparse
 
 def perform_search(query, filename, start, api_key, total_results):
     api = shodan.Shodan(api_key)
@@ -17,13 +18,12 @@ def perform_search(query, filename, start, api_key, total_results):
 
         print(f"Query {start // 1000 + 1} completed.")
 
-        # Check if we have retrieved all desired results
         if start >= total_results:
-            return True  # Signal to stop further queries
+            return True  
     except Exception as e:
         print("Error:", e)
 
-    return False  # Continue querying
+    return False  
 
 def main():
     print(f"""{Style.BRIGHT + Fore.RED}
@@ -39,20 +39,24 @@ def main():
 {Style.BRIGHT + Fore.YELLOW}{"Coded by sk1dr0wz".center(80)}
 {"Shodan Scrapper Tool".center(80)}
 {"Copyright By: Hamba Abdi".center(80)}
+{"pip install -r requirements.txt".center(80)}
 {Fore.WHITE}════════════════════════════════════════════════════════════════════════════════════════""")
 
-    # Read API key from config.ini
-    config = configparser.ConfigParser()
-    config.read('config.ini')
-    shodan_api_key = config['API_KEYS']['SHODAN_API_KEY']
+    parser = argparse.ArgumentParser(description='Shodan Scrapper Tool')
+    parser.add_argument('-q', '--query', help='Shodan dork query', required=True)
+    parser.add_argument('-t', '--total_results', type=int, default=1000, help='Total number of results to retrieve')
+    args = parser.parse_args()
 
-    # Minimum Total Results Is 1000 = 1 Query
-    query = input("Enter your Shodan dork query: ")
-    total_results = int(input("Enter the total number of results you want to retrieve: "))
+    query = args.query
+    total_results = args.total_results
     chunk_size = 1000
     num_queries = total_results // chunk_size
 
     filename = "results.txt"
+
+    config = configparser.ConfigParser()
+    config.read('config.ini')
+    shodan_api_key = config['API_KEYS']['SHODAN_API_KEY']
 
     api_keys = [shodan_api_key]
 
@@ -63,7 +67,7 @@ def main():
         stop_scraping = perform_search(query, filename, start_index, api_keys[key_index], total_results)
 
         if stop_scraping:
-            break  # Stop making further queries
+            break  
 
         key_index = (key_index + 1) % len(api_keys)
 
