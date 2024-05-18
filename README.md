@@ -10,7 +10,7 @@ Shodan Scrapper is a command-line utility designed to streamline the process of 
 ```
 git clone https://github.com/Sk1dr0wz/Shodan_Scrapper.git
 cd Shodan_Scrapper
-pip -r requirements.txt
+pip intstall -r requirements.txt
 ```
 
 # API
