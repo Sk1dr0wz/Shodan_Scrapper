@@ -26,7 +26,7 @@ Example : python3 dork.py -q port:3306 -t 1000
 
 # Tool View
 
-![screenshot](poc.png)
+![screenshot](carbon.png)
 
 # Credit
 * [Hamba Abdi]
