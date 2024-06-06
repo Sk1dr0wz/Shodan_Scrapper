@@ -2,6 +2,11 @@ import shodan
 import configparser
 from colorama import Fore, Style
 import argparse
+import os
+from sys import stdout
+
+def clear():
+    os.system('clear' if os.name == 'posix' else 'cls')
 
 def perform_search(query, filename, start, api_key, total_results):
     api = shodan.Shodan(api_key)
@@ -16,31 +21,30 @@ def perform_search(query, filename, start, api_key, total_results):
                 os_info = result['os']
                 f.write(f"{ip},{port},{hostname},{os_info}\n")
 
-        print(f"Query {start // 1000 + 1} completed.")
+        print(f"{Fore.YELLOW}Query {Fore.WHITE}{start // 1000 + 1} {Fore.GREEN}completed.")
 
         if start >= total_results:
             return True  
     except Exception as e:
-        print("Error:", e)
+        print(f"{Fore.RED}Error: {e}")
 
     return False  
 
 def main():
-    print(f"""{Style.BRIGHT + Fore.RED}
-
-███████╗██╗  ██╗ ██╗██████╗ ██████╗  ██████╗ ██╗    ██╗███████╗
-██╔════╝██║ ██╔╝███║██╔══██╗██╔══██╗██╔═████╗██║    ██║╚══███╔╝
-███████╗█████╔╝ ╚██║██║  ██║██████╔╝██║██╔██║██║ █╗ ██║  ███╔╝ 
-╚════██║██╔═██╗  ██║██║  ██║██╔══██╗████╔╝██║██║███╗██║ ███╔╝  
-███████║██║  ██╗ ██║██████╔╝██║  ██║╚██████╔╝╚███╔███╔╝███████╗
-╚══════╝╚═╝  ╚═╝ ╚═╝╚═════╝ ╚═╝  ╚═╝ ╚═════╝  ╚══╝╚══╝ ╚══════╝
-
-{Fore.WHITE}════════════════════════════════════════════════════════════════════════════════════════
-{Style.BRIGHT + Fore.YELLOW}{"Coded by sk1dr0wz".center(80)}
-{"Shodan Scrapper Tool".center(80)}
-{"Copyright By: Hamba Abdi".center(80)}
-{"pip install -r requirements.txt".center(80)}
-{Fore.WHITE}════════════════════════════════════════════════════════════════════════════════════════""")
+    clear()
+    stdout.write("                                                                                         \n")
+    stdout.write("" + Fore.LIGHTRED_EX + "███████╗██╗  ██╗ ██╗██████╗ ██████╗  ██████╗ ██╗    ██╗███████╗\n")
+    stdout.write("" + Fore.LIGHTRED_EX + "██╔════╝██║ ██╔╝███║██╔══██╗██╔══██╗██╔═████╗██║    ██║╚══███╔╝\n")
+    stdout.write("" + Fore.LIGHTRED_EX + "███████╗█████╔╝ ╚██║██║  ██║██████╔╝██║██╔██║██║ █╗ ██║  ███╔╝ \n")
+    stdout.write("" + Fore.LIGHTRED_EX + "╚════██║██╔═██╗  ██║██║  ██║██╔══██╗████╔╝██║██║███╗██║ ███╔╝ \n")
+    stdout.write("" + Fore.LIGHTRED_EX + "███████║██║  ██╗ ██║██████╔╝██║  ██║╚██████╔╝╚███╔███╔╝███████╗\n")
+    stdout.write("" + Fore.LIGHTRED_EX + "╚══════╝╚═╝  ╚═╝ ╚═╝╚═════╝ ╚═╝  ╚═╝ ╚═════╝  ╚══╝╚══╝ ╚══════╝\n")
+    stdout.write("" + Fore.YELLOW + "════════════════════════════════════════════════════════════════════════════════════════\n")
+    stdout.write("" + Style.BRIGHT + Fore.YELLOW + f"{'Coded by Sk1drowz'.center(80)}\n")
+    stdout.write("" + Style.BRIGHT + Fore.YELLOW + f"{'Shodan Scaper Tool'.center(80)}\n")
+    stdout.write("" + Style.BRIGHT + Fore.YELLOW + f"{'Copyright By: Hamba Abdi'.center(80)}\n")
+    stdout.write("" + Fore.YELLOW + "════════════════════════════════════════════════════════════════════════════════════════\n")
+    print(f"{Fore.YELLOW}[Install Module First!] - {Fore.GREEN}pip install -r requirements.txt\n")
 
     parser = argparse.ArgumentParser(description='Shodan Scrapper Tool')
     parser.add_argument('-q', '--query', help='Shodan dork query', required=True)
