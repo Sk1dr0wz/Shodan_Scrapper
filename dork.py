@@ -17,9 +17,7 @@ def perform_search(query, filename, start, api_key, total_results):
             for result in results['matches']:
                 ip = result['ip_str']
                 port = result['port']
-                hostname = result['hostnames'][0] if result['hostnames'] else ''
-                os_info = result['os']
-                f.write(f"{ip},{port},{hostname},{os_info}\n")
+                f.write(f"{ip},{port}\n")
 
         print(f"{Fore.YELLOW}Query {Fore.WHITE}{start // 1000 + 1} {Fore.GREEN}completed.")
 
@@ -76,6 +74,21 @@ def main():
         key_index = (key_index + 1) % len(api_keys)
 
     print(f"All queries completed. Results saved to {filename}")
+
+    save_choice = input(f"Do you want to save IP only (Y) or IP:port combinations (N)? ").strip().lower()
+
+    if save_choice == 'y':
+        with open(filename, 'r') as f:
+            lines = f.readlines()
+        with open(filename, 'w') as f:
+            for line in lines:
+                ip, port = line.strip().split(',')
+                f.write(f"{ip}\n")
+        print("Saved only IPs to results.txt")
+    elif save_choice == 'n':
+        print("Saved IPs with ports to results.txt")
+    else:
+        print("Invalid choice. Saved IPs with ports (default) to results.txt")
 
 if __name__ == "__main__":
     main()
