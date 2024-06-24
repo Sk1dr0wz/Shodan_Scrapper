@@ -21,7 +21,7 @@ You need to fill yours Shodan API in config.ini before run the tool .
 # How To Run
 ```
 python3 dork.py [-h] -q QUERY [-t TOTAL_RESULTS]
-Example : python3 dork.py -q port:3306 -t 1000
+Example : python3 dork.py -q 'RTSP Port:554 has_screenshot:true' -t 1000
 ```
 
 # Tool View
