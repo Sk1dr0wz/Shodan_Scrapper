@@ -2,31 +2,12 @@ import shodan
 import configparser
 from colorama import Fore, Style
 import argparse
+import sys
 import os
 from sys import stdout
 
 def clear():
     os.system('clear' if os.name == 'posix' else 'cls')
-
-def perform_search(query, filename, start, api_key, total_results):
-    api = shodan.Shodan(api_key)
-
-    try:
-        results = api.search(query, page=start // 1000 + 1)
-        with open(filename, "a") as f:
-            for result in results['matches']:
-                ip = result['ip_str']
-                port = result['port']
-                f.write(f"{ip},{port}\n")
-
-        print(f"{Fore.YELLOW}Query {Fore.WHITE}{start // 1000 + 1} {Fore.GREEN}completed.")
-
-        if start >= total_results:
-            return True  
-    except Exception as e:
-        print(f"{Fore.RED}Error: {e}")
-
-    return False  
 
 def main():
     clear()
@@ -39,56 +20,75 @@ def main():
     stdout.write("" + Fore.LIGHTRED_EX + "╚══════╝╚═╝  ╚═╝ ╚═╝╚═════╝ ╚═╝  ╚═╝ ╚═════╝  ╚══╝╚══╝ ╚══════╝\n")
     stdout.write("" + Fore.YELLOW + "════════════════════════════════════════════════════════════════════════════════════════\n")
     stdout.write("" + Style.BRIGHT + Fore.YELLOW + f"{'Coded by Sk1drowz'.center(80)}\n")
-    stdout.write("" + Style.BRIGHT + Fore.YELLOW + f"{'Shodan Scaper Tool'.center(80)}\n")
+    stdout.write("" + Style.BRIGHT + Fore.YELLOW + f"{'Shodan Scraper Tool (Premium Edition)'.center(80)}\n")
     stdout.write("" + Style.BRIGHT + Fore.YELLOW + f"{'Copyright By: Hamba Abdi'.center(80)}\n")
     stdout.write("" + Fore.YELLOW + "════════════════════════════════════════════════════════════════════════════════════════\n")
     print(f"{Fore.YELLOW}[Install Module First!] - {Fore.GREEN}pip install -r requirements.txt\n")
 
-    parser = argparse.ArgumentParser(description='Shodan Scrapper Tool')
-    parser.add_argument('-q', '--query', help='Shodan dork query', required=True)
-    parser.add_argument('-t', '--total_results', type=int, default=1000, help='Total number of results to retrieve (1000 equal to 1 Query. 1 Query equal to 100 results.)')
+    parser = argparse.ArgumentParser(description='Shodan Scraper Tool')
+    parser.add_argument('-q', '--query', nargs='+', help='Shodan dork query', required=True)
+    parser.add_argument('-t', '--total_results', type=int, default=0, help='Total number of results to retrieve (0 to download all)')
     args = parser.parse_args()
 
-    query = args.query
-    total_results = args.total_results
-    chunk_size = 1000
-    num_queries = total_results // chunk_size
-
-    filename = "results.txt"
+    query = " ".join(args.query)
+    total_limit = args.total_results
+    filename = "target.txt"
 
     config = configparser.ConfigParser()
-    config.read('config.ini')
-    shodan_api_key = config['API_KEYS']['SHODAN_API_KEY']
+    try:
+        config.read('config.ini')
+        shodan_api_key = config['API_KEYS']['SHODAN_API_KEY']
+    except KeyError:
+        print(f"{Fore.RED}[!] Please ensure config.ini exists and contains SHODAN_API_KEY under [API_KEYS]{Style.RESET_ALL}")
+        return
 
-    api_keys = [shodan_api_key]
+    api = shodan.Shodan(shodan_api_key)
 
-    key_index = 0
+    print(f"[*] Dorking  : {Fore.GREEN}{query}{Style.RESET_ALL}")
+    print(f"[*] Fetching data using Premium Cursor...\n")
 
-    for i in range(num_queries):
-        start_index = i * chunk_size
-        stop_scraping = perform_search(query, filename, start_index, api_keys[key_index], total_results)
+    count = 0
+    try:
+        with open(filename, "a") as f:
+            for result in api.search_cursor(query):
+                ip = result['ip_str']
+                port = result['port']
+                
+                f.write(f"{ip}:{port}\n")
+                
+                count += 1
+                
+                sys.stdout.write(f"\r[+] Successfully fetched: {Fore.YELLOW}{count}{Style.RESET_ALL} targets")
+                sys.stdout.flush()
 
-        if stop_scraping:
-            break  
+                if total_limit > 0 and count >= total_limit:
+                    break
 
-        key_index = (key_index + 1) % len(api_keys)
+        print(f"\n\n{Fore.GREEN}[+] Done! All {count} targets have been temporarily saved to {filename}{Style.RESET_ALL}")
 
-    print(f"All queries completed. Results saved to {filename}")
+        # --- Interactive Save Prompt ---
+        save_choice = input(f"\nDo you want to save IP only (Y) or IP:port combinations (N)? ").strip().lower()
 
-    save_choice = input(f"Do you want to save IP only (Y) or IP:port combinations (N)? ").strip().lower()
+        if save_choice == 'y':
+            with open(filename, 'r') as f:
+                lines = f.readlines()
+            with open(filename, 'w') as f:
+                for line in lines:
+                    if ':' in line:
+                        ip = line.strip().split(':')[0]
+                        f.write(f"{ip}\n")
+                    else:
+                        f.write(line)
+            print(f"{Fore.GREEN}[+] Saved only IPs to {filename}{Style.RESET_ALL}")
+        elif save_choice == 'n':
+            print(f"{Fore.GREEN}[+] Saved IPs with ports to {filename}{Style.RESET_ALL}")
+        else:
+            print(f"{Fore.YELLOW}[!] Invalid choice. Saved IPs with ports (default) to {filename}{Style.RESET_ALL}")
 
-    if save_choice == 'y':
-        with open(filename, 'r') as f:
-            lines = f.readlines()
-        with open(filename, 'w') as f:
-            for line in lines:
-                ip, port = line.strip().split(',')
-                f.write(f"{ip}\n")
-        print("Saved only IPs to results.txt")
-    elif save_choice == 'n':
-        print("Saved IPs with ports to results.txt")
-    else:
-        print("Invalid choice. Saved IPs with ports (default) to results.txt")
+    except shodan.APIError as e:
+        print(f"\n{Fore.RED}[!] Shodan API Error: {e}{Style.RESET_ALL}")
+    except Exception as e:
+        print(f"\n{Fore.RED}[!] Unexpected Error: {e}{Style.RESET_ALL}")
 
 if __name__ == "__main__":
     main()
